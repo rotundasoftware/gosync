@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ivancevich/gosync/gosync"
-	"github.com/ivancevich/gosync/version"
+	"github.com/rotundasoftware/gosync/gosync"
+	"github.com/rotundasoftware/gosync/version"
 
 	log "github.com/cihub/seelog"
 	"github.com/codegangsta/cli"

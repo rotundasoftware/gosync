@@ -12,11 +12,11 @@ Ensure you have Go 1.2 or greater installed and your GOPATH is set.
 
 Clone the repo:
 
-    go get github.com/ivancevich/gosync
+    go get github.com/rotundasoftware/gosync
 
 Change into the gosync directory and run make:
 
-    cd $GOPATH/src/github.com/ivancevich/gosync/
+    cd $GOPATH/src/github.com/rotundasoftware/gosync/
     make
 
 # Setup
