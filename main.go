@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/brettweavnet/gosync/gosync"
-	"github.com/brettweavnet/gosync/version"
+	"github.com/ivancevich/gosync/gosync"
+	"github.com/ivancevich/gosync/version"
 
 	log "github.com/cihub/seelog"
 	"github.com/codegangsta/cli"
@@ -20,13 +20,12 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.IntFlag{Name: "concurrent, c", Value: 20, Usage: "number of concurrent transfers"},
 		cli.StringFlag{Name: "log-level, l", Value: "info", Usage: "log level"},
-		cli.StringFlag{Name: "aws-secret-access-key", Value: "", Usage: "AWS Secret Access Key"},
 		cli.StringFlag{Name: "aws-access-key-id", Value: "", Usage: "AWS Access Key Id"},
+		cli.StringFlag{Name: "aws-access-key-secret", Value: "", Usage: "AWS Access Key Secret"},
 		cli.StringFlag{Name: "aws-security-token", Value: "", Usage: "AWS Security Token"},
 		cli.StringFlag{Name: "aws-region", Value: "", Usage: "AWS Region"},
+		cli.StringFlag{Name: "aws-acl", Value: "private", Usage: "AWS ACL"},
 	}
-
-	const concurrent = 20
 
 	app.Action = func(c *cli.Context) {
 		defer log.Flush()
@@ -36,9 +35,11 @@ func main() {
 		exitOnError(err)
 
 		key := c.String("aws-access-key-id")
-		secret := c.String("aws-secret-access-key")
+		secret := c.String("aws-access-key-secret")
 		token := c.String("aws-security-token")
 		region := c.String("aws-region")
+		acl := c.String("aws-acl")
+		concurrent := c.Int("concurrent")
 
 		auth, err := aws.GetAuth(key, secret)
 		exitOnError(err)
@@ -47,15 +48,13 @@ func main() {
 		}
 
 		source := c.Args()[0]
-		log.Infof("Setting source to '%s'.", source)
-
 		target := c.Args()[1]
+
+		log.Infof("Setting source to '%s'.", source)
 		log.Infof("Setting target to '%s'.", target)
+		log.Infof("Setting concurrent transfers to '%d'.", concurrent)
 
-		syncPair := gosync.NewSyncPair(auth, source, target, region)
-
-		syncPair.Concurrent = c.Int("concurrent")
-		log.Infof("Setting concurrent transfers to '%d'.", syncPair.Concurrent)
+		syncPair := gosync.NewSyncPair(auth, source, target, region, acl, concurrent)
 
 		err = syncPair.Sync()
 		exitOnError(err)

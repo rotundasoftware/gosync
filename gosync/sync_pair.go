@@ -12,16 +12,18 @@ type SyncPair struct {
 	Source     string
 	Target     string
 	Concurrent int
-	Region string
+	Region     string
+	ACL        string
 }
 
-func NewSyncPair(auth aws.Auth, source string, target string, region string) *SyncPair {
+func NewSyncPair(auth aws.Auth, source, target, region, acl string, concurrent int) *SyncPair {
 	return &SyncPair{
 		Auth:       auth,
 		Source:     source,
 		Target:     target,
-		Concurrent: 1,
-		Region: region,
+		Concurrent: concurrent,
+		Region:     region,
+		ACL:        acl,
 	}
 }
 

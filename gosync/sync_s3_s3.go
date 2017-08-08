@@ -43,7 +43,7 @@ func (s *SyncPair) concurrentSyncS3ToS3(sourceS3Url, targetS3Url s3Url, sourceBu
 		return err
 	}
 
-	for file, _ := range sourceFiles {
+	for file := range sourceFiles {
 		// ensure the file has no leading slashes to it compares correctly
 		relativeTargetFile := strings.TrimLeft(strings.Join([]string{targetS3Url.Path(), file}, "/"), "/")
 

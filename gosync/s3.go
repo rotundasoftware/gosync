@@ -65,10 +65,9 @@ func loadS3Files(bucket *s3.Bucket, path string, files map[string]string, marker
 func lookupBucket(bucketName string, auth aws.Auth, region string) (*s3.Bucket, error) {
 	log.Infof("Looking up region for bucket '%s'.", bucketName)
 
-	if(region != "") {
+	if region != "" {
 		log.Debugf("Looking for bucket '%s' in '%s'.", bucketName, region)
-		s3 := s3.New(auth, aws.Regions[region])
-		bucket := s3.Bucket(bucketName)
+		bucket := s3.New(auth, aws.Regions[region]).Bucket(bucketName)
 
 		// If list return, bucket is valid in this region.
 		_, err := bucket.List("", "", "", 0)
@@ -81,7 +80,7 @@ func lookupBucket(bucketName string, auth aws.Auth, region string) (*s3.Bucket, 
 	// Looking in each region for bucket
 	// To do, make this less crusty and ghetto
 
-	for lregion, _ := range aws.Regions {
+	for lregion := range aws.Regions {
 		// Current does not support gov lregion or china
 		if lregion == "us-gov-west-1" || lregion == "cn-north-1" {
 			log.Debugf("Skipping %s", lregion)
@@ -89,8 +88,7 @@ func lookupBucket(bucketName string, auth aws.Auth, region string) (*s3.Bucket, 
 		}
 
 		log.Debugf("Looking for bucket '%s' in '%s'.", bucketName, lregion)
-		s3 := s3.New(auth, aws.Regions[lregion])
-		bucket := s3.Bucket(bucketName)
+		bucket := s3.New(auth, aws.Regions[lregion]).Bucket(bucketName)
 
 		// If list return, bucket is valid in this lregion.
 		_, err := bucket.List("", "", "", 0)

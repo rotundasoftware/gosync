@@ -38,7 +38,7 @@ func (s *SyncPair) concurrentSyncS3ToDir(s3url s3Url, bucket *s3.Bucket, targetF
 	pool := newPool(s.Concurrent)
 	var wg sync.WaitGroup
 
-	for file, _ := range sourceFiles {
+	for file := range sourceFiles {
 		if targetFiles[file] != sourceFiles[file] {
 			filePath := strings.Join([]string{s.Target, file}, "/")
 			if filepath.Dir(filePath) != "." {

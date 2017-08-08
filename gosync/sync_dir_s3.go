@@ -42,7 +42,7 @@ func (s *SyncPair) concurrentSyncDirToS3(s3url s3Url, bucket *s3.Bucket, targetF
 	pool := newPool(s.Concurrent)
 	var wg sync.WaitGroup
 
-	for file, _ := range sourceFiles {
+	for file := range sourceFiles {
 		// ensure the file has no leading slashes to it compares correctly
 		relativeTargetFile := strings.TrimLeft(strings.Join([]string{s3url.Path(), file}, "/"), "/")
 
@@ -59,7 +59,7 @@ func (s *SyncPair) concurrentSyncDirToS3(s3url s3Url, bucket *s3.Bucket, targetF
 			wg.Add(1)
 			go func(doneChan chan error, filePath string, bucket *s3.Bucket, keyPath string) {
 				defer wg.Done()
-				writeLocalFileToS3Routine(doneChan, filePath, bucket, keyPath)
+				writeLocalFileToS3Routine(doneChan, filePath, bucket, keyPath, s.ACL)
 				pool <- 1
 			}(doneChan, filePath, bucket, keyPath)
 		}
@@ -70,8 +70,8 @@ func (s *SyncPair) concurrentSyncDirToS3(s3url s3Url, bucket *s3.Bucket, targetF
 	return nil
 }
 
-func writeLocalFileToS3Routine(doneChan chan error, filePath string, bucket *s3.Bucket, file string) {
-	err := writeLocalFileToS3(bucket, file, filePath)
+func writeLocalFileToS3Routine(doneChan chan error, filePath string, bucket *s3.Bucket, file, acl string) {
+	err := writeLocalFileToS3(bucket, file, filePath, acl)
 	if err != nil {
 		doneChan <- err
 	}
@@ -79,16 +79,16 @@ func writeLocalFileToS3Routine(doneChan chan error, filePath string, bucket *s3.
 	doneChan <- nil
 }
 
-func writeLocalFileToS3(bucket *s3.Bucket, path string, file string) error {
+func writeLocalFileToS3(bucket *s3.Bucket, path string, file, acl string) error {
 	contType := mime.TypeByExtension(filepath.Ext(file))
-	Perms := s3.ACL("private")
+	perms := s3.ACL(acl)
 
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
 
-	if err := bucket.Put(path, data, contType, Perms); err != nil {
+	if err := bucket.Put(path, data, contType, perms); err != nil {
 		return err
 	}
 
